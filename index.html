@@ -22,6 +22,61 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 h-screen overflow-hidden flex">
 
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 35px; border-radius: 16px; width: 380px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2); text-align: left;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="width: 50px; height: 50px; background: #eff6ff; color: #2563eb; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px;">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <h2 style="font-size: 22px; font-weight: bold; color: #1e293b; margin: 0;">Jaskomodern</h2>
+                <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Silakan login untuk mengakses gudang</p>
+            </div>
+            
+            <form onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">USERNAME</label>
+                    <input type="text" id="input-username" placeholder="Masukkan username" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">PASSWORD</label>
+                    <input type="password" id="input-password" placeholder="Masukkan password" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
+                </div>
+                <div id="error-msg" style="color: #dc2626; font-size: 12px; text-align: center; display: none; background: #ffeeec; padding: 8px; border-radius: 6px;">
+                    Username atau Password salah!
+                </div>
+                <button type="submit" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: background 0.2s; margin-top: 4px;">Login ke Sistem</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT VALIDASI LOGIN -->
+    <script>
+        const VALID_USER = "jaskomodern";
+        const VALID_PASS = "admin123";
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const uInput = document.getElementById('input-username').value.trim();
+            const pInput = document.getElementById('input-password').value;
+
+            if (uInput === VALID_USER && pInput === VALID_PASS) {
+                document.getElementById('login-overlay').style.display = 'none';
+                sessionStorage.setItem('jasko_auth', 'true');
+            } else {
+                const errBox = document.getElementById('error-msg');
+                errBox.style.display = 'block';
+                document.getElementById('input-password').value = '';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('jasko_auth') === 'true') {
+                document.getElementById('login-overlay').style.display = 'none';
+            }
+        });
+    </script>
+
     <!-- Sidebar -->
     <aside class="w-64 bg-slate-900 text-white flex flex-col h-full shadow-xl z-20">
         <div class="p-6 border-b border-slate-800">
@@ -62,6 +117,10 @@
 
             <button onclick="factoryReset()" class="w-full px-4 py-2 text-sm text-red-400 border border-red-900/50 hover:bg-red-900/30 hover:text-red-300 rounded-lg transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-trash-can"></i> Hapus Semua Data
+            </button>
+
+            <button onclick="logoutSistem()" class="w-full px-4 py-2 text-sm text-slate-400 border border-slate-700 hover:bg-slate-800 hover:text-white rounded-lg transition flex items-center justify-center gap-2 mt-2">
+                <i class="fa-solid fa-right-from-bracket"></i> Keluar / Lock
             </button>
         </div>
     </aside>
@@ -357,7 +416,6 @@
             if (stored) {
                 db = JSON.parse(stored);
             } else {
-                // Biarkan kosong jika tidak ada data awal
                 db = { master: [], masuk: [], keluar: [] };
             }
             renderAll();
@@ -377,8 +435,14 @@
             }
         }
 
+        function logoutSistem() {
+            if(confirm("Keluar dari sesi ini?")) {
+                sessionStorage.removeItem('jasko_auth');
+                location.reload();
+            }
+        }
+
         // === IMPORT EXCEL FEATURE ===
-        // === IMPORT EXCEL FEATURE SESUAI FORMAT EXCEL ANDA ===
         function handleImportExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -392,7 +456,6 @@
                 let importedSheets = [];
 
                 try {
-                    // 1. Process Data Master (Header di baris 4, data mulai baris 5 -> range: 3)
                     if (workbook.SheetNames.includes("Data Master")) {
                         const wsMaster = workbook.Sheets["Data Master"];
                         const masterData = XLSX.utils.sheet_to_json(wsMaster, { range: 3 });
@@ -412,7 +475,6 @@
                         importedSheets.push("Data Master");
                     }
                     
-                    // 2. Process Barang Masuk
                     if (workbook.SheetNames.includes("Barang Masuk")) {
                         const wsMasuk = workbook.Sheets["Barang Masuk"];
                         const masukData = XLSX.utils.sheet_to_json(wsMasuk, { range: 3 });
@@ -443,7 +505,6 @@
                         importedSheets.push("Barang Masuk");
                     }
 
-                    // 3. Process Barang Keluar
                     if (workbook.SheetNames.includes("Barang Keluar")) {
                         const wsKeluar = workbook.Sheets["Barang Keluar"];
                         const keluarData = XLSX.utils.sheet_to_json(wsKeluar, { range: 3 });
@@ -496,7 +557,6 @@
 
             let wb = XLSX.utils.book_new();
 
-            // Export Master & Laporan
             let laporanData = db.master.map(m => {
                 let totalMasuk = db.masuk.filter(x => x.name === m.name).reduce((sum, current) => sum + current.qty, 0);
                 let totalKeluar = db.keluar.filter(x => x.name === m.name).reduce((sum, current) => sum + current.qty, 0);
@@ -514,7 +574,6 @@
                 XLSX.utils.book_append_sheet(wb, wsLaporan, "Laporan Stok & Master");
             }
 
-            // Export Masuk
             if(db.masuk.length > 0) {
                 let masukData = db.masuk.map(m => ({
                     "Tanggal": m.date,
@@ -526,7 +585,6 @@
                 XLSX.utils.book_append_sheet(wb, wsMasuk, "Log Barang Masuk");
             }
 
-            // Export Keluar
             if(db.keluar.length > 0) {
                 let keluarData = db.keluar.map(k => ({
                     "Tanggal": k.date,
@@ -543,7 +601,6 @@
 
             XLSX.writeFile(wb, "Backup_Stok_Jaskomodern.xlsx");
         }
-
 
         // === UI NAVIGATION ===
         function switchTab(tabId) {
@@ -575,12 +632,10 @@
         };
         const getNowStr = () => {
             const now = new Date();
-            // Menyesuaikan waktu lokal
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             return now.toISOString().slice(0,16).replace('T', ' ');
         };
 
-        // Realtime Clock
         setInterval(() => {
             document.getElementById('current-time').innerText = new Date().toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
         }, 1000);
@@ -691,7 +746,6 @@
                     rowClass = "bg-red-50/30 hover:bg-red-50/60";
                     lowStockCount++;
                     
-                    // Add to Dashboard Alert List
                     listLowStock.innerHTML += `
                         <li class="flex justify-between items-center p-3 bg-red-50 rounded-lg border border-red-100">
                             <div>
@@ -723,7 +777,6 @@
                 listLowStock.innerHTML = `<li class="text-sm text-slate-500 text-center py-4 bg-slate-50 rounded-lg"><i class="fa-solid fa-shield-check text-emerald-500 text-2xl block mb-2"></i> Semua stok dalam kondisi aman.</li>`;
             }
 
-            // Update Dashboard UI
             document.getElementById('dash-total-model').innerText = totalModel;
             document.getElementById('dash-total-masuk').innerText = totalMasukGlobal;
             document.getElementById('dash-total-keluar').innerText = totalKeluarGlobal;
