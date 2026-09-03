@@ -1,0 +1,85 @@
+/* ==========================================================================
+   Jaskomodern Warehouse Management - Custom Stylesheet
+   ========================================================================== */
+
+/* 1. Pengaturan Dasar & Variabel Warna */
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --bg-color: #f1f5f9;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+}
+
+/* 2. Custom Scrollbar yang Halus */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 3. Mencegah Kedipan Elemen Alpine.js saat Memuat */
+[x-cloak] {
+    display: none !important;
+}
+
+/* 4. Transisi Halus pada Elemen Interaktif */
+button, input, select, a {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 5. Efek Kartu / Card Modern */
+.warehouse-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    border-radius: 1rem;
+}
+
+.warehouse-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* 6. Pengaturan Tampilan saat Dicetak (Print / PDF) */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .printable {
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    th, td {
+        border: 1px solid #cbd5e1 !important;
+        color: #000000 !important;
+    }
+}
